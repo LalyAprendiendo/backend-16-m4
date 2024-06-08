@@ -1,7 +1,7 @@
 // Una vez completadas las funciones, convertilas en métodos estaticos de la clase Book.
+import uuid from "uuid"
+import { readFile,writeFile } from "./db"
 
-import DB from "../database/books.json"
-const PATH = "./src/database/books.json"
 
 interface BookData {
   name: string
@@ -20,11 +20,11 @@ class Book {
     this.name = name
     this.released = released
     this.author = author
-    this.id = this.createUUID()
+    this.id = Book.createUUID()
   }
 
-  private createUUID(): string {
-    return randomUUID()
+  private static createUUID(): string {
+    return uuid.v4()
   }
 
   getAge() {
@@ -35,15 +35,22 @@ class Book {
     return currentYear - releasedDate
   }
   static findBookByTitle(title: string) {
-    return DB.find((book) => book.name.includes(title))
+    const books = readFile() 
+    const book = books.find((book)=>{book.name === title})
+    if(!book) return " libro No Encotrado "
+    return book 
+    
+    
   }
 
   static uploadNewBook(book: Book): boolean {
-    const isBookOnDB = this.findBookByTitle(book.name)
+    const isBookOnDB = Book.findBookByTitle(book.name)
 
-    isBookOnDB ? false : DB.push(book)
-    const stringifiedDB = JSON.stringify(DB)
-    writeFileSync(PATH, stringifiedDB)
+     const books = readFile()
+
+   typeof isBookOnDB != "string" ? false : books.push(book)
+    writeFile(books)
+    
 
     return true
   }
